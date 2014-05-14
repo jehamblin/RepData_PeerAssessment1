@@ -3,63 +3,35 @@
 
 ## Loading and preprocessing the data
 
-```{r}
 setwd("~/GitHub/RepData_PeerAssessment1")
 df <- read.csv("activity.csv")
 df$date <- as.Date(df$date, "%Y-%m-%d")
-```
 
 ## What is mean total number of steps taken per day?
 
-First we clean the data set by removing NA values, then we find the total number of steps per day.
-
-```{r}
 library(reshape2)
 df2 <- df[!is.na(df$steps),]
 totSteps <- tapply(df2$steps,df2$date,sum)
 totSteps <- totSteps[!is.na(totSteps)]
-```
 
-Here is a histogram of the total number of steps per day.
-
-```{r}
 hist(totSteps)
-```
 
-The mean number of steps taken per day is:
-
-```{r}
 mean(totSteps)
-```
 
 The median number of steps taken per day is:
-
-```{r}
+  
 median(totSteps)
-```
 
 ## What is the average daily activity pattern?
 
-```{r}
 meanSteps <- tapply(df2$steps,df2$interval,mean)
 plot(names(meanSteps),meanSteps,type="l",xlab="5-minute interval",ylab="Number of Steps Taken")
-```
 
-To find the time interval with the highest average number of steps, we use the which.max function:
-
-```{r}
 which.max(meanSteps)
-```
 
 ## Imputing missing values
 
-For missing (NA) values, we will first compute a "default day" of data, consisting of the mean for 
-the missing time interval.
-
-```{r}
 defaultDay <- data.frame(mean=meanSteps)
 head(defaultDay)
-```
-
 
 ## Are there differences in activity patterns between weekdays and weekends?
