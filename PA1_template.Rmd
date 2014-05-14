@@ -3,6 +3,8 @@
 
 ## Loading and preprocessing the data
 
+We read in the data and reformat the "date" column to be R date objects.
+
 ```{r}
 setwd("~/GitHub/RepData_PeerAssessment1")
 df <- read.csv("activity.csv")
@@ -58,8 +60,46 @@ the missing time interval.
 
 ```{r}
 defaultDay <- data.frame(mean=meanSteps)
-head(defaultDay)
 ```
 
+Now we create a new data set that is equal to the old one, but with the NA values filled in with these defaults.
+
+```{r}
+df3 <- df
+df3$steps[is.na(df3$steps)] <- defaultDay[as.character(df3$interval[is.na(df3$steps)]),]
+```
+
+Let's compare the total number of steps per day of this new data set to the original.
+
+```{r}
+totSteps3 <- tapply(df3$steps,df3$date,sum)
+par(mfrow = c(1,2))
+hist(totSteps,main="Original Data Set",xlab="Total Steps per Day")
+hist(totSteps3,main="New Data Set",xlab="Total Steps per Day")
+```
+
+There are slight differences in the new data set, but the overall pattern seems to be the same.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+First we separate weekends from weekdays.
+
+```{r}
+df3$weekendQ <- (weekdays(df3$date) == "Saturday") | (weekdays(df3$date) == "Sunday")
+```
+
+Now we reshape the data and compute means.
+
+```{r}
+meltedData <- melt(df3,id=c("weekendQ","interval"),measure.vars=c("steps"))
+meanData <- dcast(meltedData,weekendQ + interval ~ variable,mean)
+meanData$dayType <- factor(meanData$weekendQ,labels=c("Weekday","Weekend"))
+```
+
+Finally, we create a lattice plot of our weekday and weekend data sets.
+
+```{r}
+library(lattice)
+xyplot(steps ~ interval | dayType, data=meanData,type="l",layout=c(1,2),xlab="Interval",ylab="Number of Steps")
+```
+
